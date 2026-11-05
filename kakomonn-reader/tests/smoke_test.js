@@ -4,7 +4,7 @@ const fs = require("node:fs");
 const path = require("node:path");
 
 const { chromium } = require("playwright");
-const { kakomonnFreeEnvironment } = require("../../scripts/kakomonn-config.cjs");
+const { kakomonnFreeEnvironment, readKakomonnConfiguration } = require("../../scripts/kakomonn-config.cjs");
 const {
   installSyncFixture,
   PENDING_ATTEMPT_KEY,
@@ -115,10 +115,11 @@ const mockBody = `
       中小企業診断士試験 令和2年度（2020年） 問19（経済学・経済政策 問19）
       <span><a href="#report">（訂正依頼・報告はこちら）</a></span>
     </p>
-    <div class="ttl">
+    <div class="question-writing-scroll"><div class="ttl">
       これは動作確認用の問題文です.<br>
       これは改行後の問題文です.
-    </div>
+    </div></div>
+    <p class="question-writing-hint">横にスクロールして続きを読む</p>
     <div class="zoomin">
       <a href="https://cdn.example.test/question.png">
         <img
@@ -1853,9 +1854,11 @@ async function main() {
   assert.equal(script.includes("SpeechSynthesisUtterance"), false);
   assert.equal(script.includes("Microsoft Ayumi"), false);
 
+  const executablePath = readKakomonnConfiguration().KAKOMONN_CHROMIUM_EXECUTABLE;
   const browser = await chromium.launch({
     env: kakomonnFreeEnvironment(),
     headless: true,
+    ...(executablePath ? { executablePath } : {}),
   });
   try {
     await assertReaderBridge(browser, script);

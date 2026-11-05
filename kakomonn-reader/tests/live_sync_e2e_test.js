@@ -1,4 +1,5 @@
 const assert = require("node:assert/strict");
+const { execFileSync } = require("node:child_process");
 const fs = require("node:fs");
 const path = require("node:path");
 const { request } = require('playwright');
@@ -517,8 +518,23 @@ async function runLiveSync(api) {
     );
     assert.notEqual(automaticSpeechState, null);
     assert.equal(automaticSpeechState.topControlsPresent, false);
+    await chrome.context.grantPermissions(["clipboard-read", "clipboard-write"], {
+      origin: new URL(CURRENT_QUESTION_URL).origin,
+    });
+    const clipboardNonce = `kakomonn-live-copy-before-${Date.now()}`;
+    await page.evaluate((value) => navigator.clipboard.writeText(value), clipboardNonce);
     await submitCorrectAnswer(page);
     const navigationResult = await waitForAutomaticTransition(page);
+    let copiedMarkdown;
+    await waitUntil("the real Tampermonkey clipboard write", () => {
+      copiedMarkdown = execFileSync("mise", ["exec", "--", "pwsh", "-NoProfile", "-Command",
+        "[Console]::OutputEncoding = [Text.UTF8Encoding]::new(); Get-Clipboard -Raw"],
+      { encoding: "utf8", windowsHide: true });
+      return copiedMarkdown !== clipboardNonce && copiedMarkdown.includes("## 問題文");
+    });
+    assert.match(copiedMarkdown, /国民経済計算の考え方に関する記述として/);
+    assert.equal(copiedMarkdown.includes(`選択肢5: ${correctAnswerText}`), true);
+    assert.match(copiedMarkdown, /## 解説/);
     let finalState;
     let synchronizedReaderState = null;
     if (navigationResult.kind === "question") {

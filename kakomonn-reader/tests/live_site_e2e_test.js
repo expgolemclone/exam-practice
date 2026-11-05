@@ -669,7 +669,7 @@ async function runRandomNavigationCase(browser, script) {
     await createQuestionForm.locator('input[name="maxCreateNumber"]').fill("2");
     await Promise.all([
       page.waitForURL(randomQuestionUrl, { timeout: 30_000 }),
-      createQuestionForm.locator("a.question_all").click(),
+      createQuestionForm.getByRole("button", { name: "新しく出題する" }).click(),
     ]);
     await page.getByText("解答する", { exact: true }).waitFor({ state: "visible" });
 
@@ -834,7 +834,7 @@ async function runMarkdownCopyCase(browser, script) {
     );
     assert.equal(heading, markdownQuestionHeading);
     const questionText = normalizeContent(
-      await frame.locator(".problem_detail > .ttl").innerText(),
+      await frame.locator(".problem_detail > .question-writing-scroll > .ttl").innerText(),
     );
     assert.equal(questionText, markdownQuestionText);
 

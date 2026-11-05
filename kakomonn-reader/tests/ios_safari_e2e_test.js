@@ -485,7 +485,7 @@ async function readQuestionContent(driver) {
       .replace(/\s+/g, " ")
       .trim(),
   );
-  const questionTitle = await driver.$(".problem_detail > .ttl");
+  const questionTitle = await driver.$(".problem_detail > .question-writing-scroll > .ttl");
   const questionText = normalizeContent(await questionTitle.getText());
   const choiceElements = await driver.$$(".problem_detail > ul.list > li");
   const choices = [];

@@ -5,6 +5,7 @@ import {
   answerResultFromDocument,
   findAnswerButtonAfter,
   findAnswerChoiceControls,
+  findQuestionTextElement,
   hasVisibleExplanationLock,
   isHiddenFromRendering,
   normalizeInlineText,
@@ -106,7 +107,7 @@ export function buildCopyMarkdown(documentNode) {
   }
 
   const metadataElement = directChild(problemElement, ".when");
-  const questionElement = directChild(problemElement, ".ttl");
+  const questionElement = findQuestionTextElement(problemElement);
   const choicesElement = directChild(problemElement, "ul.list");
   const metadataText = metadataElement ? questionMetadataText(metadataElement) : "";
   if (

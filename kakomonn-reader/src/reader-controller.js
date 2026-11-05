@@ -313,7 +313,7 @@ export async function startReader() {
   
     .problem_detail,
     .problem_detail > .when,
-    .problem_detail > .ttl,
+    .problem_detail > .question-writing-scroll > .ttl,
     .problem_detail > .zoomin,
     .problem_detail > ul.list,
     .problem_detail > ul.list > li,

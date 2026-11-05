@@ -3,7 +3,7 @@ const { readFile } = require("node:fs/promises");
 const { resolve } = require("node:path");
 
 const { chromium } = require("playwright");
-const { kakomonnFreeEnvironment } = require("../../scripts/kakomonn-config.cjs");
+const { kakomonnFreeEnvironment, readKakomonnConfiguration } = require("../../scripts/kakomonn-config.cjs");
 const {
   createSyncFixtureConfiguration,
   installSyncFixtureInWindow,
@@ -23,7 +23,7 @@ function questionHTML(number) {
       <body>
         <main class="problem_detail">
           <p class="when">令和8年度 問${number}</p>
-          <p class="ttl">制限時間を確認する問題です.</p>
+          <div class="question-writing-scroll"><p class="ttl">制限時間を確認する問題です.</p></div>
           <ul class="list"><li><label><input type="radio" name="answer">選択肢1</label></li></ul>
           <button type="button">解答する</button>
         </main>
@@ -175,9 +175,11 @@ async function explanationExpiryRecordsAndStays(browser, script) {
 
 async function main() {
   const script = await readFile(scriptPath, "utf8");
+  const executablePath = readKakomonnConfiguration().KAKOMONN_CHROMIUM_EXECUTABLE;
   const browser = await chromium.launch({
     env: kakomonnFreeEnvironment(),
     headless: true,
+    ...(executablePath ? { executablePath } : {}),
   });
   try {
     await questionExpiryRecordsIncorrectAndSkips(browser, script);

@@ -43,10 +43,11 @@ const fixtureBody = `
       中小企業診断士試験 令和2年度（2020年） 問19（経済学・経済政策 問19）
       <span><a href="#report">（訂正依頼・報告はこちら）</a></span>
     </p>
-    <div class="ttl">
+    <div class="question-writing-scroll"><div class="ttl">
       WebKit動作確認用の問題文です.<br>
       記号 *強調* と &lt;タグ&gt;を含みます.
-    </div>
+    </div></div>
+    <p class="question-writing-hint">横にスクロールして続きを読む</p>
     <div class="zoomin">
       <img
         src="https://cdn.example.test/webkit-question.png"

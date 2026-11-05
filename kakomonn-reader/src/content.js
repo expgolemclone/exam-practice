@@ -242,6 +242,10 @@ function visibleStructuredText(rootNode) {
   return parts.join("");
 }
 
+export function findQuestionTextElement(problemElement) {
+  return problemElement.querySelector(":scope > .question-writing-scroll > .ttl");
+}
+
 export function extractQuestionTextFromDocument(documentNode) {
   if (!documentNode?.body) {
     return "";
@@ -262,8 +266,7 @@ export function extractQuestionTextFromDocument(documentNode) {
     return "";
   }
 
-  const questionElement =
-    Array.from(problemElement.children).find((child) => child.matches(".ttl")) ?? null;
+  const questionElement = findQuestionTextElement(problemElement);
   const choicesElement =
     Array.from(problemElement.children).find((child) => child.matches("ul.list")) ?? null;
   if (
