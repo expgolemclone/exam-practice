@@ -8,6 +8,7 @@ const fixture = `<div id="js-answer-result-box" class="is-correct"></div>
   <div class="problem_detail"><div class="when">Question 問1</div>
     <div class="question-writing-scroll"><div class="ttl">Question text <span hidden>hidden question</span></div></div>
     <p class="question-writing-hint">Scroll hint</p>
+    <div class="zoomin"><a href="/question-diagram.png"><img src="/question-diagram.png" alt="Question diagram"><span>Open image in a new tab</span></a></div>
     <ul class="list"><li><label><input type="radio" name="answer" checked>Answer A</label></li>
       <li><label><input type="radio" name="answer">Answer B</label></li></ul>
     <button>解答する</button></div>
@@ -18,6 +19,7 @@ const fixture = `<div id="js-answer-result-box" class="is-correct"></div>
       <p><a href="/reference">Reference</a></p>
       <img src="/diagram.png"><p>Between diagrams</p><img src="/second.png">
       <a href="/diagram.png"><img src="/diagram.png"></a>
+      <a href="/image-reference"><img src="/linked-diagram.png" alt="Linked diagram"><span>Related diagram</span></a>
       <span style="display:none">hidden explanation</span>
     </div></div></div>`;
 
@@ -58,6 +60,11 @@ test("wrapped question text is read and copied with structured, visible Markdown
     assert.doesNotMatch(markdown, /javascript:|hidden question|hidden explanation/);
     assert.match(markdown, /\[Reference\]\(https:\/\/chushoks.kakomonn.com\/reference\)/);
     assert.equal(markdown.split("https://chushoks.kakomonn.com/diagram.png").length - 1, 1);
+    assert.equal(markdown.split("https://chushoks.kakomonn.com/question-diagram.png").length - 1, 1);
+    assert.match(markdown, /!\[Question diagram\]/);
+    assert.match(markdown, /Open image in a new tab/);
+    assert.match(markdown, /!\[Linked diagram\]/);
+    assert.equal(markdown.includes("](https://chushoks.kakomonn.com/image-reference)"), true);
     assert.match(markdown, /!\[解説画像 1\]\(https:\/\/chushoks\.kakomonn\.com\/diagram\.png\)\s+Between diagrams\s+!\[解説画像 2\]\(https:\/\/chushoks\.kakomonn\.com\/second\.png\)/);
   } finally {
     await browser.close();

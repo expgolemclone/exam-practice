@@ -37,7 +37,7 @@ function renderContent(element, state, childrenOnly = false) {
     if (copy.tagName === "A") {
       const images = original.querySelectorAll("img");
       if (!copy.hasAttribute("href") ||
-          (images.length === 1 && !copy.textContent.trim() && original.href === images[0].src)) {
+          (images.length === 1 && original.href === images[0].src)) {
         copy.replaceWith(...copy.childNodes);
       }
     }
