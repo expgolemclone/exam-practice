@@ -50,6 +50,7 @@ async function main() {
     assert.equal(ready, true, "The real source catalog was not synchronized");
     await frame.locator("body").evaluate(element => new Promise(resolve =>
       element.ownerDocument.defaultView.jQuery(resolve)));
+    await page.locator('#exam-practice-reader-time-limit[data-phase="question"]').waitFor();
     const count = await frame.locator("#question_options li").count();
     assert.equal(count, 8);
     const nativeURL = await frame.locator("body").evaluate(element => element.ownerDocument.location.href);
@@ -78,8 +79,26 @@ async function main() {
       const current = document.querySelector("#exam-practice-reader-frame")?.contentWindow;
       return current?.location.href !== previous && current?.document.querySelector("#question_options li");
     }, nativeURL);
-    console.log(JSON.stringify({ site: STUDYZ_BOKI3_SITE, choices: count, nativeAnswer: attempt.answer_result,
-      productionSync: "passed", scriptHandler: "Tampermonkey" }));
+    const nextURL = await frame.locator("body").evaluate(element => element.ownerDocument.location.href);
+    assert.notEqual(questionIdFromURL(nextURL, STUDYZ_BOKI3_SITE), null);
+    await page.goto(nativeURL, { waitUntil: "domcontentloaded", timeout: 60000 });
+    await page.locator('#exam-practice-reader-time-limit[data-phase="question"]').waitFor();
+    assert.equal(page.url(), nativeURL);
+    assert.equal(await frame.locator("#question_options").getAttribute("data-id"), questionId);
+    assert.equal(await frame.locator(".question_answer.correct, .question_answer.wrong").count(), 0);
+    const launchURL = DEFAULT_SYNC_API_ORIGIN + "/open?site=" + STUDYZ_BOKI3_SITE;
+    await page.goto(launchURL, { waitUntil: "domcontentloaded", timeout: 60000 });
+    await page.locator('#exam-practice-reader-time-limit[data-phase="question"]').waitFor();
+    const scheduledURL = await frame.locator("body").evaluate(element => element.ownerDocument.location.href);
+    const scheduledId = questionIdFromURL(scheduledURL, STUDYZ_BOKI3_SITE);
+    assert.notEqual(scheduledId, null);
+    assert.equal(page.url(), scheduledURL);
+    assert.equal(await frame.locator("#question_options").getAttribute("data-id"), scheduledId);
+    assert.equal(await page.locator("#exam-practice-reader-error-dialog").count(), 0);
+    console.log(JSON.stringify({ site: STUDYZ_BOKI3_SITE, questionURL: nativeURL, choices: count,
+      nativeAnswer: attempt.answer_result, operationId: attempt.operation_id, productionSync: "passed",
+      nextQuestionURL: nextURL, repeatedReview: "passed", launchURL, scheduledQuestionURL: scheduledURL,
+      scriptHandler: "Tampermonkey" }));
   } finally { await chrome.close(); }
 }
 
