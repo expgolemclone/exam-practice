@@ -1,7 +1,7 @@
 const assert = require("node:assert/strict");
 const path = require("node:path");
 const { readExamPracticeConfiguration } = require("../../scripts/config.cjs");
-const { STUDYZ_BOKI3_SITE } = require("../../contracts/sites.mjs");
+const { STUDYZ_BOKI3_SITE, questionIdFromURL } = require("../../contracts/sites.mjs");
 const { launchChromeWithCurrentUserscript, readChromeUserDataDir, resolveSyncToken,
   DEFAULT_SYNC_API_ORIGIN } = require("./support/chrome_tampermonkey");
 const { blockAdRequests } = require("./support/third_party_ads");
@@ -48,14 +48,21 @@ async function main() {
       await page.waitForTimeout(250);
     }
     assert.equal(ready, true, "The real source catalog was not synchronized");
+    await frame.locator("body").evaluate(element => new Promise(resolve =>
+      element.ownerDocument.defaultView.jQuery(resolve)));
     const count = await frame.locator("#question_options li").count();
     assert.equal(count, 8);
-    const questionId = await frame.locator("#question_options").getAttribute("data-id");
+    const nativeURL = await frame.locator("body").evaluate(element => element.ownerDocument.location.href);
+    const questionId = questionIdFromURL(nativeURL, STUDYZ_BOKI3_SITE);
+    assert.notEqual(questionId, null);
+    assert.equal(await frame.locator("#question_options").getAttribute("data-id"), questionId);
     await page.keyboard.press("i");
     assert.equal(await frame.locator("#question_options li[data-exam-practice-selected]").getAttribute("data-selected"), "8");
     await page.keyboard.press("Enter");
+    await frame.locator(".question_answer.correct, .question_answer.wrong").waitFor({ state: "visible" });
     let attempt = null;
-    while (Date.now() < deadline) {
+    const answerDeadline = Date.now() + 60000;
+    while (Date.now() < answerDeadline) {
       const state = await request(token, "/v12/state?" + parameters);
       const current = await details(state.today);
       attempt = current.tables.attempts.find(row => row.question_id === questionId && !seen.has(row.operation_id));
@@ -66,6 +73,11 @@ async function main() {
     assert.equal(attempt.site, STUDYZ_BOKI3_SITE);
     assert(["correct", "incorrect"].includes(attempt.answer_result));
     assert.equal(await page.locator("#exam-practice-reader-error-dialog").count(), 0);
+    if (attempt.answer_result === "incorrect") await page.keyboard.press("Enter");
+    await page.waitForFunction(previous => {
+      const current = document.querySelector("#exam-practice-reader-frame")?.contentWindow;
+      return current?.location.href !== previous && current?.document.querySelector("#question_options li");
+    }, nativeURL);
     console.log(JSON.stringify({ site: STUDYZ_BOKI3_SITE, choices: count, nativeAnswer: attempt.answer_result,
       productionSync: "passed", scriptHandler: "Tampermonkey" }));
   } finally { await chrome.close(); }
