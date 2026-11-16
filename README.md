@@ -4,7 +4,7 @@ Unofficial reading, keyboard and spaced-repetition tools for [kakomonn.com](http
 
 [Install Reader](reader/README.md#installation) / [Learning log](https://exam-practice-sync.kakomonn.workers.dev/) / [Usage and development](docs/guide.md)
 
-<img src="docs/assets/kakomonn-demo.gif" alt="Reader demo" width="960">
+<img src="docs/assets/exam-practice-demo.gif" alt="Reader demo" width="960">
 
 ## Get started
 
