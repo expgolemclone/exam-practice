@@ -1,7 +1,7 @@
 const assert = require("node:assert/strict");
 const path = require("node:path");
 const { readExamPracticeConfiguration } = require("../../scripts/config.cjs");
-const { STUDYZ_BOKI3_SITE, questionIdFromURL } = require("../../contracts/sites.mjs");
+const { STUDYZ_BOKI3_SITE, questionIdFromURL, questionURL } = require("../../contracts/sites.mjs");
 const { launchChromeWithCurrentUserscript, readChromeUserDataDir, resolveSyncToken,
   DEFAULT_SYNC_API_ORIGIN } = require("./support/chrome_tampermonkey");
 const { blockAdRequests } = require("./support/third_party_ads");
@@ -48,56 +48,84 @@ async function main() {
       await page.waitForTimeout(250);
     }
     assert.equal(ready, true, "The real source catalog was not synchronized");
-    await frame.locator("body").evaluate(element => new Promise(resolve =>
-      element.ownerDocument.defaultView.jQuery(resolve)));
-    await page.locator('#exam-practice-reader-time-limit[data-phase="question"]').waitFor();
-    const count = await frame.locator("#question_options li").count();
-    assert.equal(count, 8);
-    const nativeURL = await frame.locator("body").evaluate(element => element.ownerDocument.location.href);
-    const questionId = questionIdFromURL(nativeURL, STUDYZ_BOKI3_SITE);
-    assert.notEqual(questionId, null);
-    assert.equal(await frame.locator("#question_options").getAttribute("data-id"), questionId);
-    await page.keyboard.press("i");
-    assert.equal(await frame.locator("#question_options li[data-exam-practice-selected]").getAttribute("data-selected"), "8");
-    await page.keyboard.press("Enter");
-    await frame.locator(".question_answer.correct, .question_answer.wrong").waitFor({ state: "visible" });
-    let attempt = null;
-    const answerDeadline = Date.now() + 60000;
-    while (Date.now() < answerDeadline) {
-      const state = await request(token, "/v12/state?" + parameters);
-      const current = await details(state.today);
-      attempt = current.tables.attempts.find(row => row.question_id === questionId && !seen.has(row.operation_id));
-      if (attempt) break;
-      await page.waitForTimeout(250);
+    const questionReady = page.locator('#exam-practice-reader-time-limit[data-phase="question"]');
+    const cases = [
+      { questionId: "17139", choice: 6, input: "keyboard", answerResult: "correct" },
+      { questionId: "17140", choice: 2, input: "click", answerResult: "correct" },
+      { questionId: "17144", choice: 3, input: "keyboard", answerResult: "correct" },
+      { questionId: "17139", choice: 8, input: "keyboard", answerResult: "incorrect" },
+    ];
+    const answers = [];
+    for (const scenario of cases) {
+      const nativeURL = questionURL(STUDYZ_BOKI3_SITE, scenario.questionId);
+      await page.goto(nativeURL, { waitUntil: "domcontentloaded", timeout: 60000 });
+      await questionReady.waitFor();
+      await frame.locator("body").evaluate(element => new Promise(resolve =>
+        element.ownerDocument.defaultView.jQuery(resolve)));
+      assert.equal(page.url(), nativeURL);
+      assert.equal(await frame.locator("#question_options li").count(), 8);
+      assert.equal(await frame.locator("#question_options").getAttribute("data-id"), scenario.questionId);
+      if (scenario.questionId === "17144") {
+        const image = frame.locator("#question-image-open img");
+        await image.evaluate(element => element.decode());
+        assert.equal(await image.isVisible(), true);
+        assert.equal(await image.evaluate(element => element.naturalWidth > 0), true);
+      }
+      if (scenario.input === "click") {
+        await frame.locator(`#question_options li[data-selected="${scenario.choice}"]`).click();
+      } else {
+        await page.keyboard.press("qwertyuiop"[scenario.choice - 1]);
+        assert.equal(await frame.locator("#question_options li[data-exam-practice-selected]").getAttribute("data-selected"), String(scenario.choice));
+        await page.keyboard.press("Enter");
+      }
+      await frame.locator(scenario.answerResult === "correct" ? ".question_answer.correct" : ".question_answer.wrong").waitFor({ state: "visible" });
+      let attempt = null;
+      const answerDeadline = Date.now() + 60000;
+      while (Date.now() < answerDeadline) {
+        const state = await request(token, "/v12/state?" + parameters);
+        const current = await details(state.today);
+        attempt = current.tables.attempts.find(row => row.question_id === scenario.questionId && !seen.has(row.operation_id));
+        if (attempt) break;
+        await page.waitForTimeout(250);
+      }
+      assert(attempt, "The native answer did not reach the production learning store");
+      assert.equal(attempt.site, STUDYZ_BOKI3_SITE);
+      assert.equal(attempt.answer_result, scenario.answerResult);
+      seen.add(attempt.operation_id);
+      assert.equal(await page.locator("#exam-practice-reader-error-dialog").count(), 0);
+      if (scenario.answerResult === "incorrect") {
+        assert.equal(page.url(), nativeURL);
+        await page.keyboard.press("Enter");
+      }
+      await page.waitForFunction(previous => {
+        const current = document.querySelector("#exam-practice-reader-frame")?.contentWindow;
+        return current?.location.href !== previous && current?.document.querySelector("#question_options li");
+      }, nativeURL);
+      await questionReady.waitFor();
+      const nextURL = await frame.locator("body").evaluate(element => element.ownerDocument.location.href);
+      assert.notEqual(questionIdFromURL(nextURL, STUDYZ_BOKI3_SITE), null);
+      assert.equal(page.url(), nextURL);
+      answers.push({ questionURL: nativeURL, choice: scenario.choice, input: scenario.input,
+        nativeAnswer: attempt.answer_result, operationId: attempt.operation_id,
+        progression: scenario.answerResult === "correct" ? "automatic" : "Enter", nextQuestionURL: nextURL });
     }
-    assert(attempt, "The native answer did not reach the production learning store");
-    assert.equal(attempt.site, STUDYZ_BOKI3_SITE);
-    assert(["correct", "incorrect"].includes(attempt.answer_result));
-    assert.equal(await page.locator("#exam-practice-reader-error-dialog").count(), 0);
-    if (attempt.answer_result === "incorrect") await page.keyboard.press("Enter");
-    await page.waitForFunction(previous => {
-      const current = document.querySelector("#exam-practice-reader-frame")?.contentWindow;
-      return current?.location.href !== previous && current?.document.querySelector("#question_options li");
-    }, nativeURL);
-    const nextURL = await frame.locator("body").evaluate(element => element.ownerDocument.location.href);
-    assert.notEqual(questionIdFromURL(nextURL, STUDYZ_BOKI3_SITE), null);
-    await page.goto(nativeURL, { waitUntil: "domcontentloaded", timeout: 60000 });
-    await page.locator('#exam-practice-reader-time-limit[data-phase="question"]').waitFor();
-    assert.equal(page.url(), nativeURL);
-    assert.equal(await frame.locator("#question_options").getAttribute("data-id"), questionId);
+    const reviewURL = questionURL(STUDYZ_BOKI3_SITE, cases[0].questionId);
+    await page.goto(reviewURL, { waitUntil: "domcontentloaded", timeout: 60000 });
+    await questionReady.waitFor();
+    assert.equal(page.url(), reviewURL);
+    assert.equal(await frame.locator("#question_options").getAttribute("data-id"), cases[0].questionId);
     assert.equal(await frame.locator(".question_answer.correct, .question_answer.wrong").count(), 0);
     const launchURL = DEFAULT_SYNC_API_ORIGIN + "/open?site=" + STUDYZ_BOKI3_SITE;
     await page.goto(launchURL, { waitUntil: "domcontentloaded", timeout: 60000 });
-    await page.locator('#exam-practice-reader-time-limit[data-phase="question"]').waitFor();
+    await questionReady.waitFor();
     const scheduledURL = await frame.locator("body").evaluate(element => element.ownerDocument.location.href);
     const scheduledId = questionIdFromURL(scheduledURL, STUDYZ_BOKI3_SITE);
     assert.notEqual(scheduledId, null);
     assert.equal(page.url(), scheduledURL);
     assert.equal(await frame.locator("#question_options").getAttribute("data-id"), scheduledId);
     assert.equal(await page.locator("#exam-practice-reader-error-dialog").count(), 0);
-    console.log(JSON.stringify({ site: STUDYZ_BOKI3_SITE, questionURL: nativeURL, choices: count,
-      nativeAnswer: attempt.answer_result, operationId: attempt.operation_id, productionSync: "passed",
-      nextQuestionURL: nextURL, repeatedReview: "passed", launchURL, scheduledQuestionURL: scheduledURL,
+    console.log(JSON.stringify({ site: STUDYZ_BOKI3_SITE, answers, productionSync: "passed",
+      repeatedReview: "passed", launchURL, scheduledQuestionURL: scheduledURL,
       scriptHandler: "Tampermonkey" }));
   } finally { await chrome.close(); }
 }
