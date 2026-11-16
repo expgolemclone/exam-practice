@@ -15,7 +15,7 @@ async function jsonFile(relativePath) {
 }
 
 test("sync static assets are stored for revalidation", async () => {
-  const source = await headersSource("kakomonn-sync/public/_headers");
+  const source = await headersSource("sync/public/_headers");
   assert.match(source, /^\/\*\n  Cache-Control: no-cache\n/);
   assert.equal(source.includes("Cache-Control: no-store"), false);
   assert.match(
@@ -25,8 +25,14 @@ test("sync static assets are stored for revalidation", async () => {
 });
 
 test("sync invokes the Worker only for APIs and disables persistent telemetry", async () => {
-  const config = await jsonFile("kakomonn-sync/wrangler.jsonc");
+  const config = await jsonFile("sync/wrangler.jsonc");
   assert.deepEqual(config.assets.run_worker_first, ["/v12/*"]);
-  assert.deepEqual(config.observability, { enabled: false });
+  const packageJson = await jsonFile("package.json");
+  assert.match(packageJson.scripts["build:sync"], /wrangler deploy --dry-run --config sync\/wrangler\.jsonc/);
+  assert.deepEqual(config.observability, {
+    enabled: false,
+    logs: { enabled: false, invocation_logs: false, persist: false },
+    traces: { enabled: false, persist: false },
+  });
 });
 

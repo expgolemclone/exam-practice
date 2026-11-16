@@ -1,0 +1,22 @@
+// ==UserScript==
+// @name         Exam Practice Reader
+// @namespace    local.exam-practice.reader
+// @version      3.0.0
+// @description  問題文と解説の読み上げ, 解答後の自動Markdown copy, 学習記録の端末間同期とdaily KPI達成時の祝福を提供します.
+// @updateURL    https://github.com/expgolemclone/exam-practice/releases/latest/download/exam-practice-reader.user.js
+// @downloadURL  https://github.com/expgolemclone/exam-practice/releases/latest/download/exam-practice-reader.user.js
+// @match        https://*.kakomonn.com/*
+// @match        https://1studyz.com/boki3/*
+// @match        https://exam-practice-sync.kakomonn.workers.dev/
+// @match        https://exam-practice-sync.kakomonn.workers.dev/open*
+// @connect      exam-practice-sync.kakomonn.workers.dev
+// @connect      japaneast.tts.speech.microsoft.com
+// @run-at       document-end
+// @grant        GM.getValue
+// @grant        GM.listValues
+// @grant        GM.setValue
+// @grant        GM.deleteValue
+// @grant        GM.xmlHttpRequest
+// @grant        GM.setClipboard
+// @grant        GM_info
+// ==/UserScript==

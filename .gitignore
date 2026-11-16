@@ -2,10 +2,11 @@ __pycache__/
 node_modules/
 .env
 .env.*
-kakomonn.toml
+exam-practice.toml
+PLAN.md
 .dev.vars
 .dev.vars.*
 .wrangler/
-kakomonn-sync/dist/
-kakomonn-reader/release-under-test/
-kakomonn-reader/test-results/
+sync/dist/
+reader/release-under-test/
+reader/test-results/

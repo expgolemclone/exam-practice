@@ -8,12 +8,12 @@ import { existsSync, mkdtempSync, readFileSync, rmSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 
 const require = createRequire(import.meta.url);
-const { focusSecureTextField, typeNativeText, resolveAppiumCli, resolveAppiumRuntimeDirectory, safariCapabilities, clickWebElementNatively } = require('../kakomonn-reader/tests/ios_safari_e2e_test.js');
+const { focusSecureTextField, typeNativeText, resolveAppiumCli, resolveAppiumRuntimeDirectory, safariCapabilities, clickWebElementNatively } = require('../reader/tests/ios_safari_e2e_test.js');
 
 test('iOS runner loads in a clean CI home without machine-local configuration', () => {
-  const home = mkdtempSync(join(tmpdir(), 'kakomonn-ios-ci-home-'));
+  const home = mkdtempSync(join(tmpdir(), 'exam-practice-ios-ci-home-'));
   try {
-    const runner = fileURLToPath(new URL('../kakomonn-reader/tests/ios_safari_e2e_test.js', import.meta.url));
+    const runner = fileURLToPath(new URL('../reader/tests/ios_safari_e2e_test.js', import.meta.url));
     const result = spawnSync(process.execPath, ['-e', `
       require('node:assert/strict').equal(require('node:os').homedir(), process.argv[2]);
       require(process.argv[1]);

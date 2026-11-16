@@ -1,0 +1,7 @@
+# Required for production sync access.
+EXAM_PRACTICE_SYNC_TOKEN = ""
+
+# Optional paths. Empty values use repository defaults.
+EXAM_PRACTICE_CHROME_USER_DATA_DIR = ""
+EXAM_PRACTICE_CHROME_EXECUTABLE = ""
+EXAM_PRACTICE_READER_SCRIPT_PATH = ""

@@ -10,6 +10,8 @@ const SCAN_EXTENSIONS = new Set([
   ".css",
   ".html",
   ".js",
+  ".jsx",
+  ".cjs",
   ".json",
   ".jsonc",
   ".mjs",
@@ -28,12 +30,12 @@ const SKIP_DIRECTORIES = new Set([
   "node_modules",
 ]);
 
-const SKIP_FILES = new Set(["package-lock.json", "kakomonn-reader.user.js"]);
+const SKIP_FILES = new Set(["package-lock.json", "exam-practice-reader.user.js"]);
 
 // legacy migration code and fixtures intentionally keep the retired names.
 const EXEMPT_FILES = new Set([
-  "kakomonn-sync/src/storage/schema.js",
-  "kakomonn-sync/tests/learning-state.test.js",
+  "sync/src/storage/schema.js",
+  "sync/tests/learning-state.test.js",
   "tests/repository_naming_test.mjs",
 ]);
 
@@ -64,31 +66,31 @@ const RETIRED_PATTERNS = [
 
 const RETIRED_RUNTIME_PATTERNS = [
   /isWindowsEdge/,
-  /KAKOMONN_EDGE_/,
+  /EXAM_PRACTICE_EDGE_/,
   /edge_tampermonkey/,
   /launchDedicatedEdge/,
   /readEdgeUserDataDir/,
   /edgeLaunchArguments/,
   /stopDedicatedEdge/,
-  /kakomonn-edge-e2e/,
+  /exam-practice-edge-e2e/,
 ];
 
 const UNSUPPORTED_HANDLER_FIXTURES = new Set([
-  "kakomonn-reader/tests/live_sync_e2e_unit_test.js",
-  "kakomonn-reader/tests/smoke_test.js",
+  "reader/tests/live_sync_e2e_unit_test.js",
+  "reader/tests/smoke_test.js",
 ]);
 
 const CONFIGURATION_RUNTIME_EXEMPT_FILES = new Set([
-  "kakomonn-reader/tests/live_sync_e2e_unit_test.js",
-  "tests/kakomonn-config.test.mjs",
+  "reader/tests/live_sync_e2e_unit_test.js",
+  "tests/config.test.mjs",
   "tests/repository_naming_test.mjs",
 ]);
 
 const RETIRED_CONFIGURATION_PATTERNS = [
-  /(?:process\kakomonn.toml|environment|systemEnvironment)\.KAKOMONN_/,
-  /\$env:KAKOMONN_/,
+  /(?:process\.env|environment|systemEnvironment)\.EXAM_PRACTICE_/,
+  /\$env:EXAM_PRACTICE_/,
   /--env-file(?:-if-exists)?(?:=|\s)/,
-  /KAKOMONN_E2E_/,
+  /EXAM_PRACTICE_E2E_/,
 ];
 
 async function* listFiles(directory) {
@@ -147,7 +149,7 @@ test("retired runtime names stay out of production code and support files", asyn
   assert.deepEqual(violations, [], `retired runtime names were found:\n${violations.join("\n")}`);
 });
 
-test("Kakomonn settings are read only through the repository configuration loader", async () => {
+test("ExamPractice settings are read only through the repository configuration loader", async () => {
   const violations = [];
   for await (const filePath of listFiles(repositoryRoot)) {
     const relativePath = relative(repositoryRoot, filePath).replaceAll("\\", "/");
@@ -164,6 +166,34 @@ test("Kakomonn settings are read only through the repository configuration loade
   assert.deepEqual(
     violations,
     [],
-    `retired Kakomonn configuration access was found:\n${violations.join("\n")}`,
+    `retired ExamPractice configuration access was found:\n${violations.join("\n")}`,
   );
+});
+
+
+test("shared Reader modules contain no website DOM selectors or native route parsers", async () => {
+  const directory = join(repositoryRoot, "reader", "src");
+  const violations = [];
+  for (const entry of await readdir(directory, { withFileTypes: true })) {
+    if (!entry.isFile() || ![".js", ".jsx", ".mjs"].includes(extname(entry.name))) continue;
+    const source = await readFile(join(directory, entry.name), "utf8");
+    if (/\.problem_detail|#js-(?:answer-result-box|commentary-wrap)|StudyRandumId|\/createques/.test(source)) {
+      violations.push(entry.name);
+    }
+  }
+  assert.deepEqual(violations, []);
+});
+
+test("product-wide namespaces and filenames do not reuse the website name", async () => {
+  const violations = [];
+  for await (const path of listFiles(repositoryRoot)) {
+    const name = relative(repositoryRoot, path).replaceAll("\\", "/");
+    if (name === "reader/src/storage-migration.js" || name === "contracts/sites.mjs" || name.startsWith("reader/tests/") ||
+        name.startsWith("tests/") || name.startsWith("sync/tests/") || name === "PLAN.md") continue;
+    const source = await readFile(path, "utf8");
+    if (/kakomonn-(?:reader|sync|dashboard)|KAKOMONN_|local\.kakomonn\.reader|data-kakomonn-/.test(source)) {
+      violations.push(name);
+    }
+  }
+  assert.deepEqual(violations, []);
 });

@@ -1,6 +1,6 @@
 const { spawnSync } = require("node:child_process");
 const path = require("node:path");
-const { kakomonnFreeEnvironment } = require("./kakomonn-config.cjs");
+const { examPracticeFreeEnvironment } = require("./config.cjs");
 
 const CHROME_AUTOPLAY_ARGUMENT = "--autoplay-policy=no-user-gesture-required";
 const CHROME_REMOTE_DEBUGGING_ARGUMENT = "--remote-debugging-port=0";
@@ -131,7 +131,7 @@ function runPowerShell(
     ["exec", "--", "pwsh", "-NoLogo", "-NoProfile", "-NonInteractive", "-Command", `& {${source}\n}`, ...arguments_],
     {
       encoding: "utf8",
-      env: kakomonnFreeEnvironment(systemEnvironment),
+      env: examPracticeFreeEnvironment(systemEnvironment),
       windowsHide: true,
     },
   );

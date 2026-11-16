@@ -1,5 +1,5 @@
 - Changes to production artifacts require release or deployment and production verification, not just a push. Follow the [test requirements](docs/guide.md#tests) and [release and deployment procedure](docs/guide.md#release-and-deployment); do not duplicate them here.
-- Keep learning metric and KPI definitions in [`learning-store.js`](kakomonn-sync/src/learning-store.js) and shared validation in [`contracts/kakomonn.mjs`](contracts/kakomonn.mjs). Consumers must not duplicate these definitions. Breaking API changes require a new API version and coordinated client/server updates.
+- Keep learning metric and KPI definitions in [`learning-store.js`](sync/src/learning-store.js) and shared validation in [`contracts/api.mjs`](contracts/api.mjs). Consumers must not duplicate these definitions. Breaking API changes require a new API version and coordinated client/server updates.
 - Serve static files through Cloudflare Workers Static Assets without invoking the Worker. Route only dynamic API requests through the Worker.
 - Disable production observability, persistent logs, and tracing. Use real-time tail only for incident investigation.
 - Normally use one Worker request and one Durable Object RPC per user action. Avoid polling and unnecessary Cron jobs.

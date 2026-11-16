@@ -135,14 +135,15 @@ function tampermonkeyReadyExpression(userscriptIdentity) {
 })()`;
 }
 
-async function waitForKakomonnLaunch(page, { timeoutMs = DEVTOOLS_TIMEOUT_MS } = {}) {
+async function waitForExamPracticeLaunch(page, { timeoutMs = DEVTOOLS_TIMEOUT_MS } = {}) {
   const deadline = Date.now() + timeoutMs;
   while (Date.now() < deadline) {
     const handle = await page.waitForFunction(() => {
-      const bridgeState = document.documentElement.dataset.kakomonnReaderBridgeState;
-      const bridgeError = document.documentElement.dataset.kakomonnReaderBridgeError;
+      const bridgeState = document.documentElement.dataset.examPracticeReaderBridgeState;
+      const bridgeError = document.documentElement.dataset.examPracticeReaderBridgeError;
       const openError = document.querySelector("#open-error-detail")?.textContent;
-      if (/^https:\/\/chushoks\.kakomonn\.com\/questions\/\d+$/.test(location.href)) {
+      if (document.querySelector("#exam-practice-reader-shell")?.dataset.scriptHandler === "Tampermonkey" &&
+          document.querySelector("#exam-practice-reader-frame")) {
         return JSON.stringify({ state: "ready" });
       }
       if (["ready", "empty", "unauthorized", "error"].includes(bridgeState)) {
@@ -157,16 +158,16 @@ async function waitForKakomonnLaunch(page, { timeoutMs = DEVTOOLS_TIMEOUT_MS } =
     await handle.dispose();
     if (result.state !== "error") return result.state;
     if (!TRANSIENT_BRIDGE_ERRORS.has(result.code) && result.code !== "reader_ready_timeout") {
-      throw new Error(`Kakomonn reader bridge failed: ${result.code}`);
+      throw new Error(`ExamPractice reader bridge failed: ${result.code}`);
     }
     if (Date.now() + LAUNCH_RETRY_DELAY_MS >= deadline) break;
     await page.waitForTimeout(LAUNCH_RETRY_DELAY_MS);
     await page.reload({ waitUntil: "domcontentloaded", timeout: Math.max(1, deadline - Date.now()) });
   }
-  throw new Error("Kakomonn reader bridge did not become ready");
+  throw new Error("ExamPractice reader bridge did not become ready");
 }
 
-async function prepareKakomonnPage(port, {
+async function prepareExamPracticePage(port, {
   connect = chromium.connectOverCDP.bind(chromium),
   openURL,
   tampermonkeyExtensionId,
@@ -190,7 +191,7 @@ async function prepareKakomonnPage(port, {
     await application.goto(openURL, { waitUntil: "domcontentloaded", timeout: DEVTOOLS_TIMEOUT_MS });
     await bootstrap.close();
     bootstrap = null;
-    await waitForKakomonnLaunch(application);
+    await waitForExamPracticeLaunch(application);
     const session = await context.newCDPSession(application);
     const { targetInfo } = await session.send("Target.getTargetInfo");
     await session.detach();
@@ -208,8 +209,8 @@ module.exports = {
   TAMPERMONKEY_BETA_EXTENSION_ID,
   activePortPath,
   tampermonkeyReadyExpression,
-  waitForKakomonnLaunch,
-  prepareKakomonnPage,
+  waitForExamPracticeLaunch,
+  prepareExamPracticePage,
   readDevToolsActivePort,
   waitForDevToolsActivePort,
 };
