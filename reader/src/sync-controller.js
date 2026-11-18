@@ -233,6 +233,7 @@ export function installSyncController(app) {
     const task = pendingAttemptStoragePromise.then(async () => {
       await GM.deleteValue(app.PENDING_ATTEMPT_KEY);
       app.pendingAttempt = null;
+      app.restoredAttempt = null;
     });
     pendingAttemptStoragePromise = task.catch(() => {});
     return task;
@@ -492,14 +493,9 @@ export function installSyncController(app) {
       app.pendingAttempt = null;
     } else {
       app.pendingAttempt = storedAttempt;
-      if (
-        app.pendingAttempt?.phase === "recorded" &&
-        app.pendingAttempt.answerResult === "correct"
-      ) {
-        app.resolveCorrectFeedbackKpi(
-          app.pendingAttempt.questionId,
-          app.pendingAttempt.kpiQuestionsRemaining,
-        );
+      app.restoredAttempt = storedAttempt;
+      if (storedAttempt?.phase === "recorded" && storedAttempt.answerResult === "correct") {
+        app.resolveCorrectFeedbackKpi(storedAttempt.questionId, storedAttempt.kpiQuestionsRemaining);
       }
     }
     if (storedCelebration !== null && !isPendingCelebration(storedCelebration)) {

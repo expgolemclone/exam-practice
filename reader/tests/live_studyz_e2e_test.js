@@ -30,6 +30,7 @@ async function main() {
   try {
     await blockAdRequests(chrome.context);
     const page = await chrome.context.newPage();
+    await page.setViewportSize({ width: 1280, height: 720 });
     page.setDefaultTimeout(60000);
     await page.goto("https://1studyz.com/boki3/random", { waitUntil: "domcontentloaded", timeout: 60000 });
     const frame = page.frameLocator("#exam-practice-reader-frame");
@@ -51,6 +52,7 @@ async function main() {
     assert.equal(ready, true, "The real source catalog was not synchronized");
     const questionReady = page.locator('#exam-practice-reader-time-limit[data-phase="question"]');
     const cases = [
+      { questionId: "17139", choice: 1, input: "click", answerResult: "incorrect", leaveReview: true },
       { questionId: "17139", choice: 6, input: "keyboard", answerResult: "correct" },
       { questionId: "17140", choice: 2, input: "click", answerResult: "correct" },
       { questionId: "17144", choice: 3, input: "keyboard", answerResult: "correct" },
@@ -98,8 +100,16 @@ async function main() {
       assert.equal(attempt.answer_result, scenario.answerResult);
       seen.add(attempt.operation_id);
       assert.equal(await page.locator("#exam-practice-reader-error-dialog").count(), 0);
+      const answer = { questionURL: nativeURL, choice: scenario.choice, input: scenario.input,
+        nativeAnswer: attempt.answer_result, operationId: attempt.operation_id };
       if (scenario.answerResult === "incorrect") {
         assert.equal(page.url(), nativeURL);
+        if (scenario.leaveReview) {
+          await page.locator('#exam-practice-reader-shell[aria-busy="false"]').waitFor();
+          await frame.locator(".question_explanation_locked").waitFor();
+          answers.push({ ...answer, progression: "reopen without advancing" });
+          continue;
+        }
         await page.keyboard.press("Enter");
       }
       await page.waitForFunction(previous => {
@@ -110,9 +120,7 @@ async function main() {
       const nextURL = await frame.locator("body").evaluate(element => element.ownerDocument.location.href);
       assert.notEqual(questionIdFromURL(nextURL, STUDYZ_BOKI3_SITE), null);
       assert.equal(page.url(), nextURL);
-      answers.push({ questionURL: nativeURL, choice: scenario.choice, input: scenario.input,
-        nativeAnswer: attempt.answer_result, operationId: attempt.operation_id,
-        progression: scenario.answerResult === "correct" ? "automatic" : "Enter", nextQuestionURL: nextURL,
+      answers.push({ ...answer, progression: scenario.answerResult === "correct" ? "automatic" : "Enter", nextQuestionURL: nextURL,
         ...(scenario.questionId === "17174" ? { choiceShortcuts: "asdfghjk", scrollShortcuts: "z/x/gg", focus: ["outer", "frame"] } : {}) });
     }
     const reviewURL = questionURL(STUDYZ_BOKI3_SITE, cases[0].questionId);

@@ -29,9 +29,13 @@ export function installNavigationController(app) {
     return app.answerResultFromDocument(app.frameDocument);
   }
 
+  function isCopyFinished(operation) {
+    return ["completed", "failed", "restricted", "not-required"].includes(operation.copy.state);
+  }
+
   function isCopyReadyForNavigation(operation) {
     return (
-      ["completed", "failed", "restricted", "not-required"].includes(operation.copy.state) ||
+      isCopyFinished(operation) ||
       (app.isIPhoneSafari && operation.copy.state === "ready")
     );
   }
@@ -283,24 +287,22 @@ export function installNavigationController(app) {
     }
   }
 
+  function leftRestoredAttempt(operation) {
+    if (operation.operationId !== app.restoredAttempt?.operationId || !isCopyFinished(operation) ||
+        app.pendingCelebration !== null || !app.frameDocument || app.currentQuestionControls() === null) {
+      return false;
+    }
+    const id = currentQuestionId();
+    if (id !== operation.questionId) return id !== null;
+    // On a fresh visit the native site may have discarded the incorrect-answer review.
+    return app.restoredAttempt.phase === "recorded" && operation.answerResult === "incorrect" &&
+      operation.copy.state !== "not-required" && getCurrentAnswerResult() === "unknown";
+  }
+
   async function completePendingAttemptNavigation() {
-    if (
-      app.pendingAttempt === null ||
-      app.pendingAttempt.phase !== "recorded" ||
-      app.pendingAttempt.nextURL === null ||
-      !app.syncReady ||
-      app.syncInProgress ||
-      app.nextQuestionOperationInProgress
-    ) {
-      return false;
-    }
-    if (app.currentFrameURL !== app.pendingAttempt.nextURL) {
-      return false;
-    }
     if (app.pendingAttemptTransitionPromise !== null) {
       return app.pendingAttemptTransitionPromise;
     }
-    const operation = app.pendingAttempt;
     app.pendingAttemptTransitionPromise = (async () => {
       synchronizeCurrentHistoryURL();
       activatingFutureHistoryState = null;
@@ -326,7 +328,6 @@ export function installNavigationController(app) {
   }
 
   async function resumePendingLearningFlow() {
-    await completePendingAttemptNavigation();
     if (
       app.pendingAttempt?.phase === "queued" &&
       app.syncReady &&
@@ -578,10 +579,15 @@ export function installNavigationController(app) {
         "達成情報は保持されています. ページを再読み込みしてください.",
       );
     }
-    if (
-      app.pendingAttempt.phase !== "recorded" ||
-      !isCopyReadyForNavigation(app.pendingAttempt)
-    ) {
+    const operation = app.pendingAttempt;
+    if (operation.phase !== "recorded" ||
+        (!app.frameDocument && operation.operationId === app.restoredAttempt?.operationId)) {
+      return false;
+    }
+    if (app.currentFrameURL === operation.nextURL || leftRestoredAttempt(operation)) {
+      return completePendingAttemptNavigation();
+    }
+    if (!isCopyReadyForNavigation(operation)) {
       return false;
     }
     if (app.isIPhoneSafari && app.pendingAttempt.answerResult === "incorrect") {

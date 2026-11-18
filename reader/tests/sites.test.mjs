@@ -129,8 +129,8 @@ test("the shared Reader handles Studyz shortcuts and records a restricted eight-
     await page.keyboard.press("q");
     await expect(frame.locator('#question_options li[data-exam-practice-selected]')).toHaveAttribute("data-selected", "1");
     await page.keyboard.press("Enter");
-    await page.waitForFunction(async site => {
-      const pending = await GM.getValue("exam-practice-reader." + site + ".v9.pending-attempt");
+    await page.waitForFunction(site => {
+      const pending = window.__getGMValue("exam-practice-reader." + site + ".v9.pending-attempt");
       return pending?.phase === "recorded" && pending.copy.state === "restricted";
     }, STUDYZ_BOKI3_SITE);
     await expect(page).toHaveURL(question);
