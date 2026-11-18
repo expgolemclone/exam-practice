@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Exam Practice Reader
 // @namespace    local.exam-practice.reader
-// @version      3.0.1
+// @version      3.0.2
 // @description  問題文と解説の読み上げ, 解答後の自動Markdown copy, 学習記録の端末間同期とdaily KPI達成時の祝福を提供します.
 // @updateURL    https://github.com/expgolemclone/exam-practice/releases/latest/download/exam-practice-reader.user.js
 // @downloadURL  https://github.com/expgolemclone/exam-practice/releases/latest/download/exam-practice-reader.user.js

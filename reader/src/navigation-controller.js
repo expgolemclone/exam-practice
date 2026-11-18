@@ -31,7 +31,7 @@ export function installNavigationController(app) {
 
   function isCopyReadyForNavigation(operation) {
     return (
-      ["completed", "failed", "not-required"].includes(operation.copy.state) ||
+      ["completed", "failed", "restricted", "not-required"].includes(operation.copy.state) ||
       (app.isIPhoneSafari && operation.copy.state === "ready")
     );
   }

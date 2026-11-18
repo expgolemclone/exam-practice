@@ -156,7 +156,7 @@ export function installCopyController(app) {
   function processPendingAutomaticCopy() {
     const operation = app.pendingAttempt;
     if (operation === null || !["required", "ready"].includes(operation.copy.state)) {
-      return Promise.resolve(["completed", "failed"].includes(operation?.copy.state));
+      return Promise.resolve(["completed", "failed", "restricted"].includes(operation?.copy.state));
     }
     const { operationId, questionId } = operation;
     if (automaticCopyOperation?.operationId === operationId) {
@@ -174,7 +174,7 @@ export function installCopyController(app) {
         }
         if (copyDocument.state === "restricted") {
           discardAnswerCopyOperation();
-          await setCopyState(operationId, { state: "not-required" });
+          await setCopyState(operationId, { state: "restricted" });
           void app.maybePreparePendingDestination();
           return true;
         }

@@ -5,6 +5,7 @@ const { STUDYZ_BOKI3_SITE, questionIdFromURL, questionURL } = require("../../con
 const { launchChromeWithCurrentUserscript, readChromeUserDataDir, resolveSyncToken,
   DEFAULT_SYNC_API_ORIGIN } = require("./support/chrome_tampermonkey");
 const { blockAdRequests } = require("./support/third_party_ads");
+const { verifyStudyzShortcuts } = require("./support/studyz-shortcuts.cjs");
 
 async function request(token, route) {
   const response = await fetch(DEFAULT_SYNC_API_ORIGIN + route, {
@@ -53,7 +54,7 @@ async function main() {
       { questionId: "17139", choice: 6, input: "keyboard", answerResult: "correct" },
       { questionId: "17140", choice: 2, input: "click", answerResult: "correct" },
       { questionId: "17144", choice: 3, input: "keyboard", answerResult: "correct" },
-      { questionId: "17139", choice: 8, input: "keyboard", answerResult: "incorrect" },
+      { questionId: "17174", choice: 8, input: "keyboard", answerResult: "incorrect" },
     ];
     const answers = [];
     for (const scenario of cases) {
@@ -65,11 +66,15 @@ async function main() {
       assert.equal(page.url(), nativeURL);
       assert.equal(await frame.locator("#question_options li").count(), 8);
       assert.equal(await frame.locator("#question_options").getAttribute("data-id"), scenario.questionId);
-      if (scenario.questionId === "17144") {
+      if (["17144", "17174"].includes(scenario.questionId)) {
         const image = frame.locator("#question-image-open img");
         await image.evaluate(element => element.decode());
         assert.equal(await image.isVisible(), true);
         assert.equal(await image.evaluate(element => element.naturalWidth > 0), true);
+      }
+      if (scenario.questionId === "17174") {
+        await verifyStudyzShortcuts(page, frame);
+        assert.equal(await page.locator("#exam-practice-reader-error-dialog").count(), 0);
       }
       if (scenario.input === "click") {
         await frame.locator(`#question_options li[data-selected="${scenario.choice}"]`).click();
@@ -107,7 +112,8 @@ async function main() {
       assert.equal(page.url(), nextURL);
       answers.push({ questionURL: nativeURL, choice: scenario.choice, input: scenario.input,
         nativeAnswer: attempt.answer_result, operationId: attempt.operation_id,
-        progression: scenario.answerResult === "correct" ? "automatic" : "Enter", nextQuestionURL: nextURL });
+        progression: scenario.answerResult === "correct" ? "automatic" : "Enter", nextQuestionURL: nextURL,
+        ...(scenario.questionId === "17174" ? { choiceShortcuts: "asdfghjk", scrollShortcuts: "z/x/gg", focus: ["outer", "frame"] } : {}) });
     }
     const reviewURL = questionURL(STUDYZ_BOKI3_SITE, cases[0].questionId);
     await page.goto(reviewURL, { waitUntil: "domcontentloaded", timeout: 60000 });

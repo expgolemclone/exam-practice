@@ -156,6 +156,7 @@ export const studyzBoki3 = Object.freeze({
     }
     header, footer, .bottom-menu, .breadcrumb, .page_head, .test_next { display: none !important; }
     #question_options li[data-exam-practice-selected] { outline: 3px solid var(--exam-practice-frame-link); }
+    .answer-list dl.clicked { text-decoration: line-through; }
     .question_img img { filter: invert(100%) hue-rotate(180deg); }
   `,
 });

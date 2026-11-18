@@ -7,6 +7,7 @@ import { expect } from "playwright/test";
 import { STUDYZ_BOKI3_SITE, questionURL } from "../../contracts/sites.mjs";
 import syncFixture from "./support/sync-fixture.cjs";
 import frameSupport from "./support/frame_reader.js";
+import { verifyStudyzShortcuts } from "./support/studyz-shortcuts.cjs";
 
 const question = questionURL(STUDYZ_BOKI3_SITE, "17139");
 const nextQuestion = questionURL(STUDYZ_BOKI3_SITE, "17140");
@@ -104,10 +105,11 @@ test("1st Studyz catalogs use all public question sitemaps and reject cross-cour
   } finally { await browser.close(); }
 });
 
-test("the shared Reader records a restricted eight-choice answer without copying gated content", async () => {
+test("the shared Reader handles Studyz shortcuts and records a restricted eight-choice answer", async () => {
   const browser = await chromium.launch({ channel: "chrome", headless: true });
   try {
-    const context = await browser.newContext({ userAgent: "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36" });
+    const context = await browser.newContext({ viewport: { width: 1200, height: 480 },
+      userAgent: "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36" });
     const script = await readFile(new URL("../dist/exam-practice-reader.user.js", import.meta.url), "utf8");
     await frameSupport.installReaderInChildFrames(context, script);
     await context.route("https://1studyz.com/boki3/**", route => route.fulfill({ contentType: "text/html", body: fixture({ restricted: true }) }));
@@ -121,14 +123,19 @@ test("the shared Reader records a restricted eight-choice answer without copying
       console.error(await page.evaluate(() => ({ url: location.href, ua: navigator.userAgent, body: document.body.innerText.slice(0, 500), frames: [...document.querySelectorAll("iframe")].map(frame => ({ id: frame.id, src: frame.src, body: frame.contentDocument?.body?.innerText.slice(0, 500) })) })));
       throw error;
     });
+    await page.locator('#exam-practice-reader-time-limit[data-phase="question"]').waitFor();
     await page.waitForFunction(() => document.querySelector("#exam-practice-reader-error-dialog") === null);
+    await verifyStudyzShortcuts(page, frame);
     await page.keyboard.press("q");
-    await frame.locator('#question_options li[data-exam-practice-selected=""]').waitFor();
+    await expect(frame.locator('#question_options li[data-exam-practice-selected]')).toHaveAttribute("data-selected", "1");
     await page.keyboard.press("Enter");
-    await frame.locator("#answer").waitFor({ state: "visible" });
-    await page.waitForFunction(() => window.__syncFixture.calls.some(call => new URL(call.url).pathname === "/v12/attempts"));
-    await page.waitForFunction(site => window.__syncFixture.storageWrites.some(write =>
-      write.key === "exam-practice-reader." + site + ".v9.pending-attempt" && write.value?.copy?.state === "not-required"), STUDYZ_BOKI3_SITE);
+    await page.waitForFunction(async site => {
+      const pending = await GM.getValue("exam-practice-reader." + site + ".v9.pending-attempt");
+      return pending?.phase === "recorded" && pending.copy.state === "restricted";
+    }, STUDYZ_BOKI3_SITE);
+    await expect(page).toHaveURL(question);
+    await expect(frame.locator("#answer")).toBeVisible();
+    await expect(frame.locator("#answer .question_answer")).toHaveClass("question_answer wrong");
     const recorded = await page.evaluate(() => ({ calls: window.__syncFixture.calls, copied: window.__syncFixture.clipboardWrites }));
     const attempt = recorded.calls.find(call => new URL(call.url).pathname === "/v12/attempts");
     assert.equal(attempt.body.site, STUDYZ_BOKI3_SITE);
@@ -136,6 +143,9 @@ test("the shared Reader records a restricted eight-choice answer without copying
     assert.equal(attempt.body.answerResult, "incorrect");
     assert.deepEqual(recorded.copied, []);
     assert.equal(recorded.calls.some(call => new URL(call.url).pathname === "/v12/copy-failures"), false);
+    await page.keyboard.press("Enter");
+    await expect(page).toHaveURL(nextQuestion);
+    await expect(frame.locator("#question_options")).toBeVisible();
   } finally { await browser.close(); }
 });
 

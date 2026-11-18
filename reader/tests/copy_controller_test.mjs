@@ -60,6 +60,20 @@ test("Markdown failures are terminal and never display a dialog", async (t) => {
   }
 });
 
+test("restricted explanations finish copying without classifying the answer as skipped", async (t) => {
+  for (const iphone of [false, true]) {
+    const { app, reports, destinations, errors } = reader(t, { state: "restricted", iphone,
+      clipboard: () => assert.fail("Restricted content must not reach the clipboard") });
+    assert.equal(await app.processPendingAutomaticCopy(), true);
+    assert.deepEqual(app.pendingAttempt.copy, { state: "restricted" });
+    assert.equal(destinations.length, 1);
+    assert.deepEqual(reports, []);
+    assert.deepEqual(errors, []);
+    await app.processPendingAutomaticCopy();
+    assert.equal(destinations.length, 1);
+  }
+});
+
 test("clipboard rejection is reported without contents and does not wait for reporting", async (t) => {
   const { app, reports, errors } = reader(t, { clipboard: async () => false });
   app.requestSyncResponse = (...args) => { reports.push(args); return new Promise(() => {}); };

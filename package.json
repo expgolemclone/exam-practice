@@ -33,7 +33,7 @@
     "test:ios-controls": "node reader/tests/ios_smoke_test.js",
     "test:ios-safari": "node --use-system-ca reader/tests/ios_safari_e2e_test.js",
     "test:live-site": "node reader/tests/live_site_e2e_test.js",
-    "test:live-studyz": "node --use-system-ca --test reader/tests/studyz-live.test.mjs",
+    "test:live-studyz": "npm run build:reader && node --use-system-ca --test reader/tests/studyz-live.test.mjs",
     "test:live-studyz-sync": "npm run build:reader && node --use-system-ca reader/tests/live_studyz_e2e_test.js",
     "test:live-open": "npm run build:reader && node --use-system-ca reader/tests/live_open_e2e_test.js",
     "test:live-dashboard": "npm run build:reader && node --use-system-ca reader/tests/live_dashboard_e2e_test.js",
