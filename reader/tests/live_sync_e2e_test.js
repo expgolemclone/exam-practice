@@ -376,7 +376,7 @@ async function submitCorrectAnswer(page) {
 async function waitForAutomaticTransition(page) {
   return waitUntil("the scheduled next question or primary KPI celebration", async () => {
     const outerURL = await evaluate(page, "() => location.href");
-    if (outerURL.startsWith("https://kakomonn-congratulations.kakomonn.workers.dev/")) {
+    if (outerURL.startsWith("https://kakomonn-congratulations.expgolemclone.workers.dev/")) {
       const ready = await evaluate(
         page,
         `() => document.documentElement.dataset.state === "ready"`,

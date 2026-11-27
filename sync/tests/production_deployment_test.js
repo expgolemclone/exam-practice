@@ -8,7 +8,7 @@ const {
   requireExamPracticeConfiguration,
 } = require("../../scripts/config.cjs");
 
-const productionOrigin = "https://exam-practice-sync.kakomonn.workers.dev";
+const productionOrigin = "https://exam-practice-sync.expgolemclone.workers.dev";
 const distDirectory = resolve(__dirname, "..", "dist");
 const assetControlFiles = new Set(["_headers", "_redirects"]);
 const textAssetExtensions = new Set([".css", ".html", ".js"]);

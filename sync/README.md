@@ -4,14 +4,14 @@ A Cloudflare Worker for cross-device learning records and Azure Speech authentic
 
 ## Learning log
 
-Open the [dashboard](https://exam-practice-sync.kakomonn.workers.dev/) in a browser profile with [Reader installed and authenticated](../reader/README.md#installation).
+Open the [dashboard](https://exam-practice-sync.expgolemclone.workers.dev/) in a browser profile with [Reader installed and authenticated](../reader/README.md#installation).
 
 ## Open the next question
 
 Bookmark this URL on iPhone Safari, or use the [Windows launcher](../docs/guide.md#windows-setup):
 
 ```text
-https://exam-practice-sync.kakomonn.workers.dev/open
+https://exam-practice-sync.expgolemclone.workers.dev/open
 ```
 
 The launcher defaults to `chushoks.kakomonn.com`. Use the dashboard source selector and next-question link, or open `/open?site=studyz-boki3` for 1st Studyz bookkeeping level 3. Reader starts the site\'s normal session before opening scheduled questions.

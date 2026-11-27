@@ -60,7 +60,7 @@ export async function startReader() {
     /\bMobile\/\S+/.test(userAgent) &&
     /\bSafari\/\d+(?:\.\d+)+/.test(userAgent) &&
     !/(?:CriOS|FxiOS|EdgiOS|OPiOS)\//.test(userAgent);
-  const SYNC_API_URL = "https://exam-practice-sync.kakomonn.workers.dev";
+  const SYNC_API_URL = "https://exam-practice-sync.expgolemclone.workers.dev";
   const SYNC_TOKEN_KEY = "exam-practice-reader.sync-token";
   const LAUNCH_HANDOFF_KEY = "exam-practice-reader.v12.launch-handoff";
   const LAUNCH_HANDOFF_MAX_AGE_MS = 60000;

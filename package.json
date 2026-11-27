@@ -67,7 +67,7 @@
     "wrangler": "4.147.0"
   },
   "dependencies": {
-    "@expgolemclone/congratulations": "https://github.com/expgolemclone/congratulations/releases/download/v2.1.0/expgolemclone-congratulations-2.1.0.tgz",
+    "@expgolemclone/congratulations": "https://github.com/expgolemclone/congratulations/releases/download/v2.2.0/expgolemclone-congratulations-2.2.0.tgz",
     "@mantine/charts": "9.7.4",
     "@mantine/core": "9.7.4",
     "@mantine/hooks": "9.7.4",

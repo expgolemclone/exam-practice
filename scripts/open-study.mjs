@@ -23,7 +23,7 @@ const {
   stopDedicatedChrome,
 } = windowsChromeProfile;
 
-export const EXAM_PRACTICE_OPEN_URL = "https://exam-practice-sync.kakomonn.workers.dev/open";
+export const EXAM_PRACTICE_OPEN_URL = "https://exam-practice-sync.expgolemclone.workers.dev/open";
 export { CHROME_AUTOPLAY_ARGUMENT, CHROME_REMOTE_DEBUGGING_ARGUMENT };
 export const CHROME_HIDE_CRASH_RESTORE_BUBBLE_ARGUMENT = "--hide-crash-restore-bubble";
 export const CHROME_BOOTSTRAP_URL = "about:blank";

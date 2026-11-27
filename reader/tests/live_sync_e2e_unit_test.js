@@ -19,9 +19,9 @@ test('isolates third-party ads while preserving real questions, sync, speech, an
     ['https://cdn.anymind360.com/ad.js', 'abort'],
     ['https://geniee.jp/ad.js', 'abort'],
     ['https://chushoks.kakomonn.com/questions/86956', 'continue'],
-    ['https://exam-practice-sync.kakomonn.workers.dev/v12/state', 'continue'],
-    ['https://exam-practice-sync.kakomonn.workers.dev/v12/attempts', 'continue'],
-    ['https://exam-practice-sync.kakomonn.workers.dev/v12/copy-failures', 'continue'],
+    ['https://exam-practice-sync.expgolemclone.workers.dev/v12/state', 'continue'],
+    ['https://exam-practice-sync.expgolemclone.workers.dev/v12/attempts', 'continue'],
+    ['https://exam-practice-sync.expgolemclone.workers.dev/v12/copy-failures', 'continue'],
     ['https://japaneast.tts.speech.microsoft.com/cognitiveservices/v1', 'continue'],
     ['https://doubleclick.net.example.com/ad.js', 'continue'],
   ]) {
@@ -37,7 +37,7 @@ test('isolates third-party ads while preserving real questions, sync, speech, an
 test('launches through the production bootstrap before selecting the question tab', async () => {
   const question = { url: () => 'https://chushoks.kakomonn.com/questions/86956' };
   const unrelated = [
-    'about:blank', 'https://exam-practice-sync.kakomonn.workers.dev/open',
+    'about:blank', 'https://exam-practice-sync.expgolemclone.workers.dev/open',
     'https://chushoks.kakomonn.com/offline',
     'https://chushoks.kakomonn.com/questions/86956?unrelated=1',
     'https://example.com/questions/86956',
@@ -92,7 +92,7 @@ test('uses one bounded authenticated state request without retries or redirects'
   let disposed = 0;
   const api = { async get(url, options) {
     calls++;
-    assert.equal(url, 'https://exam-practice-sync.kakomonn.workers.dev/v12/state?site=chushoks.kakomonn.com');
+    assert.equal(url, 'https://exam-practice-sync.expgolemclone.workers.dev/v12/state?site=chushoks.kakomonn.com');
     assert.deepEqual(options, { headers: { Authorization: 'Bearer fixture-token' }, timeout: 15_000, maxRetries: 0, maxRedirects: 0 });
     return { status: () => 401, async dispose() { disposed++; } };
   } };
@@ -255,7 +255,7 @@ test("requires an explicit token and never scans or writes browser storage", asy
   assert.equal(await resolveSyncToken({
     configuration: { EXAM_PRACTICE_SYNC_TOKEN: token },
     fetchImpl: async (url, options) => {
-      assert.equal(url, "https://exam-practice-sync.kakomonn.workers.dev/v12/sites");
+      assert.equal(url, "https://exam-practice-sync.expgolemclone.workers.dev/v12/sites");
       assert.equal(options.headers.Authorization, `Bearer ${token}`);
       calls += 1;
       return { status: 200, arrayBuffer: async () => new ArrayBuffer(0) };
@@ -355,7 +355,7 @@ test("launches the dedicated Chrome profile minimized", () => {
     false,
   );
   assert.equal(args.at(-1), "about:blank");
-  assert.equal(args.includes("https://exam-practice-sync.kakomonn.workers.dev/open"), false);
+  assert.equal(args.includes("https://exam-practice-sync.expgolemclone.workers.dev/open"), false);
   assert.doesNotMatch(stopDedicatedChromePowerShell, /UIAutomation|許可/);
 });
 

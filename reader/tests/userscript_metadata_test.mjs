@@ -7,8 +7,8 @@ const metadataPath = new URL("../src/userscript.meta.txt", import.meta.url);
 const expectedMatches = new Set([
   "https://*.kakomonn.com/*",
   "https://1studyz.com/boki3/*",
-  "https://exam-practice-sync.kakomonn.workers.dev/",
-  "https://exam-practice-sync.kakomonn.workers.dev/open*",
+  "https://exam-practice-sync.expgolemclone.workers.dev/",
+  "https://exam-practice-sync.expgolemclone.workers.dev/open*",
 ]);
 const updateURL =
   "https://github.com/expgolemclone/exam-practice/releases/latest/download/exam-practice-reader.user.js";

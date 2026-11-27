@@ -10,7 +10,7 @@ const SITE = "chushoks.kakomonn.com";
 const PENDING_ATTEMPT_KEY = `exam-practice-reader.${SITE}.v9.pending-attempt`;
 const PENDING_CELEBRATION_KEY = `exam-practice-reader.${SITE}.v9.pending-celebration`;
 const LEGACY_PENDING_CORRECT_KEY = `exam-practice-reader.${SITE}.pending-correct`;
-const SYNC_API_ORIGIN = "https://exam-practice-sync.kakomonn.workers.dev";
+const SYNC_API_ORIGIN = "https://exam-practice-sync.expgolemclone.workers.dev";
 const AZURE_SPEECH_ORIGIN = "https://japaneast.tts.speech.microsoft.com";
 const AZURE_SPEECH_TOKEN = "test-azure-speech-token";
 

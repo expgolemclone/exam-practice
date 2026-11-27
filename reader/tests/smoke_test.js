@@ -1447,7 +1447,7 @@ async function runQueuedCorrectFeedbackVariantCase(context, script) {
 
 async function runCorrectCelebrationFeedbackCase(context, script) {
   const page = await context.newPage();
-  await page.route("https://kakomonn-congratulations.kakomonn.workers.dev/**", (route) =>
+  await page.route("https://kakomonn-congratulations.expgolemclone.workers.dev/**", (route) =>
     route.fulfill({
       contentType: "text/html; charset=utf-8",
       body: "<!doctype html><html><body><h1>dailyKpiCompleted達成</h1></body></html>",
@@ -1504,7 +1504,7 @@ async function runCorrectCelebrationFeedbackCase(context, script) {
     assert.equal(speechCalls[1].body, expectedSpeechSSML("0", "+70%"));
     await finishManualAudio(page);
     await page.waitForURL(
-      (url) => url.origin === "https://kakomonn-congratulations.kakomonn.workers.dev",
+      (url) => url.origin === "https://kakomonn-congratulations.expgolemclone.workers.dev",
     );
     assert.equal(new URL(page.url()).searchParams.get("achievement"), "daily-study-quota");
     assert.deepEqual(errors, []);
@@ -1706,7 +1706,7 @@ async function runMismatchedCelebrationRejectedCase(context, script) {
 
 async function runIncorrectCelebrationEnterCase(context, script) {
   const page = await context.newPage();
-  await page.route("https://kakomonn-congratulations.kakomonn.workers.dev/**", (route) =>
+  await page.route("https://kakomonn-congratulations.expgolemclone.workers.dev/**", (route) =>
     route.fulfill({
       contentType: "text/html; charset=utf-8",
       body: "<!doctype html><html><body><h1>dailyKpiCompleted達成</h1></body></html>",
@@ -1726,7 +1726,7 @@ async function runIncorrectCelebrationEnterCase(context, script) {
     await markAnswerResult(childFrame, "incorrect");
     await page.keyboard.press("Enter");
     await page.waitForURL(
-      (url) => url.origin === "https://kakomonn-congratulations.kakomonn.workers.dev",
+      (url) => url.origin === "https://kakomonn-congratulations.expgolemclone.workers.dev",
     );
     assert.equal(new URL(page.url()).searchParams.get("achievement"), "daily-study-quota");
     assert.deepEqual(errors, []);
@@ -1737,7 +1737,7 @@ async function runIncorrectCelebrationEnterCase(context, script) {
 
 async function runOrphanedCelebrationRecoveryCase(context, script) {
   const page = await context.newPage();
-  await page.route("https://kakomonn-congratulations.kakomonn.workers.dev/**", (route) =>
+  await page.route("https://kakomonn-congratulations.expgolemclone.workers.dev/**", (route) =>
     route.fulfill({
       contentType: "text/html; charset=utf-8",
       body: "<!doctype html><html><body><h1>dailyKpiCompleted達成</h1></body></html>",
@@ -1753,7 +1753,7 @@ async function runOrphanedCelebrationRecoveryCase(context, script) {
   try {
     await page.addScriptTag({ content: script });
     await page.waitForURL(
-      (url) => url.origin === "https://kakomonn-congratulations.kakomonn.workers.dev",
+      (url) => url.origin === "https://kakomonn-congratulations.expgolemclone.workers.dev",
     );
     assert.equal(new URL(page.url()).searchParams.get("achievement"), "daily-study-quota");
     assert.deepEqual(errors, []);

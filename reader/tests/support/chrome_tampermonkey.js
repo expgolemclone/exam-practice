@@ -26,7 +26,7 @@ const { chromium } = require("playwright");
 const TAMPERMONKEY_EXTENSION_ID = TAMPERMONKEY_BETA_EXTENSION_ID;
 const SYNC_TOKEN_KEY = "exam-practice-reader.sync-token";
 const SYNC_TOKEN_PATTERN = /^[0-9a-f]{64}$/i;
-const DEFAULT_SYNC_API_ORIGIN = "https://exam-practice-sync.kakomonn.workers.dev";
+const DEFAULT_SYNC_API_ORIGIN = "https://exam-practice-sync.expgolemclone.workers.dev";
 const CURRENT_QUESTION_URL = "https://chushoks.kakomonn.com/questions/86956";
 const DEFAULT_CHROME_E2E_DIRECTORY_NAME = "exam-practice-chrome-e2e";
 

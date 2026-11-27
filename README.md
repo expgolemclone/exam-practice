@@ -2,7 +2,7 @@
 
 Unofficial reading, keyboard and spaced-repetition tools for [kakomonn.com](https://kakomonn.com/) and [1st Studyz bookkeeping level 3](https://1studyz.com/boki3/). Not affiliated with either operator.
 
-[Install Reader](reader/README.md#installation) / [Learning log](https://exam-practice-sync.kakomonn.workers.dev/) / [Usage and development](docs/guide.md)
+[Install Reader](reader/README.md#installation) / [Learning log](https://exam-practice-sync.expgolemclone.workers.dev/) / [Usage and development](docs/guide.md)
 
 <img src="docs/assets/exam-practice-demo.gif" alt="Reader demo" width="960">
 
@@ -10,7 +10,7 @@ Unofficial reading, keyboard and spaced-repetition tools for [kakomonn.com](http
 
 Use Windows 11 Chrome with Tampermonkey Beta, or iPhone Safari with Tampermonkey. Install Reader and enter your sync token when prompted. Speech requires an internet connection.
 
-Open the [next question](https://exam-practice-sync.kakomonn.workers.dev/open), or use the [Windows launcher](docs/guide.md#windows-setup).
+Open the [next question](https://exam-practice-sync.expgolemclone.workers.dev/open), or use the [Windows launcher](docs/guide.md#windows-setup).
 
 ### PC keyboard shortcuts
 

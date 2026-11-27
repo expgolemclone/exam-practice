@@ -52,7 +52,7 @@ async function main() {
     await frame.locator('input[name="intAnswerData"][value="5"]').locator("xpath=ancestor::label[1]").click();
     await frame.getByRole("button", { name: "解答する", exact: true }).click();
     await waitUntil("navigation after confirmed Markdown generation failure", async () => {
-      if (page.url().startsWith("https://kakomonn-congratulations.kakomonn.workers.dev/")) return true;
+      if (page.url().startsWith("https://kakomonn-congratulations.expgolemclone.workers.dev/")) return true;
       const state = await readReaderState(page);
       assert.equal(state.errorOpen, false);
       return state.frameURL !== CURRENT_QUESTION_URL && state.frameURL?.includes("/questions/");
