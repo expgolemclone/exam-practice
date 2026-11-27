@@ -288,7 +288,8 @@ export function installNavigationController(app) {
   }
 
   function leftRestoredAttempt(operation) {
-    if (operation.operationId !== app.restoredAttempt?.operationId || !isCopyFinished(operation) ||
+    if (operation.operationId !== app.restoredAttempt?.operationId ||
+        (!isCopyFinished(operation) && operation.copy.state !== "required") ||
         app.pendingCelebration !== null || !app.frameDocument || app.currentQuestionControls() === null) {
       return false;
     }
@@ -296,7 +297,7 @@ export function installNavigationController(app) {
     if (id !== operation.questionId) return id !== null;
     // On a fresh visit the native site may have discarded the incorrect-answer review.
     return app.restoredAttempt.phase === "recorded" && operation.answerResult === "incorrect" &&
-      operation.copy.state !== "not-required" && getCurrentAnswerResult() === "unknown";
+      operation.copy.state !== "not-required" && app.frameLoadedUnanswered;
   }
 
   async function completePendingAttemptNavigation() {
@@ -337,8 +338,12 @@ export function installNavigationController(app) {
     ) {
       await submitPendingAttempt();
     }
-    await app.processPendingAutomaticCopy();
-    await maybePreparePendingDestination();
+    if (app.pendingAttempt?.phase === "recorded" && leftRestoredAttempt(app.pendingAttempt)) {
+      await maybePreparePendingDestination();
+    } else {
+      await app.processPendingAutomaticCopy();
+      await maybePreparePendingDestination();
+    }
     recordCurrentAnswerIfAvailable();
   }
 

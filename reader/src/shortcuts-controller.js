@@ -286,6 +286,7 @@ export function installShortcutsController(app) {
     app.observedCommentary = null;
     app.currentPageReadPending = false;
     app.awaitingAnswerResultSpeech = false;
+    app.frameLoadedUnanswered = false;
   }
 
   function applyFrameDarkMode(sourceDocument) {
@@ -356,6 +357,7 @@ export function installShortcutsController(app) {
     app.boundFrameDocument = nextDocument;
     app.navigationInProgress = false;
     app.frameDocument = nextDocument;
+    app.frameLoadedUnanswered = app.getCurrentAnswerResult() === "unknown";
     app.synchronizeAnswerPresentation(app.frameDocument);
     app.bindStudyFrame(app.frameDocument);
     applyFrameDarkMode(app.frameDocument);

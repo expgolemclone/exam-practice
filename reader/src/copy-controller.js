@@ -158,6 +158,9 @@ export function installCopyController(app) {
     if (operation === null || !["required", "ready"].includes(operation.copy.state)) {
       return Promise.resolve(["completed", "failed", "restricted"].includes(operation?.copy.state));
     }
+    if (operation.copy.state === "required" && !app.frameDocument) {
+      return Promise.resolve(false);
+    }
     const { operationId, questionId } = operation;
     if (automaticCopyOperation?.operationId === operationId) {
       return automaticCopyOperation.dispatchPromise;

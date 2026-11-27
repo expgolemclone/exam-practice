@@ -121,6 +121,7 @@ test("fresh Studyz questions accept desktop and touch answers after an interrupt
     for (const [id, choice, device, pendingAttempt] of [
       ["17140", "1", "Desktop Chrome", previous],
       ["17174", "8", "iPhone 13", previous],
+      ["17174", "8", "Desktop Chrome", { ...previous, copy: { state: "required" } }],
       ["17140", "1", "Desktop Chrome", { ...previous, answerResult: "correct", kpiQuestionsRemaining: 1 }],
       ["17140", "1", "Desktop Chrome", queued],
     ]) {

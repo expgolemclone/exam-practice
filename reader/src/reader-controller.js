@@ -284,6 +284,7 @@ export async function startReader() {
   app.azureSpeechTokenPromise = null;
   app.frameDocument = null;
   app.boundFrameDocument = null;
+  app.frameLoadedUnanswered = false;
   app.currentPageReadPending = false;
   app.currentFrameURL = app.shouldLaunchNextQuestionAfterSync ? "about:blank" : location.href;
   app.requestedFrameURL = app.currentFrameURL;
